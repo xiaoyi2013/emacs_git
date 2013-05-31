@@ -1,11 +1,7 @@
-# -*- mode: snippet -*-
+# contributor: Jimmy Wu <frozenthrone88@gmail.com>
+# name: <head>...</head>
 # key: head
-# contributor: Translated from textmate snippet by PROGRAM_NAME
-# name: Head
-## condition: "text.html - text.html source
 # --
 <head>
-	<meta charset="utf-8">
-	<title>${1:}</title>
-	$0
+  $0
 </head>

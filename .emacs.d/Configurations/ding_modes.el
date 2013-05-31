@@ -62,7 +62,7 @@
 
 (add-to-list 'load-path "~/.emacs.d/Extensions/yasnippet")
 (require 'yasnippet)
-;;(setq yas-snippet-dirs '("~/.emacs.d/Extensions/snippets" "~/.emacs.d/Extensions/yasnippet/extras/imported"))
+
 (setq yas/prompt-functions '(yas/dropdown-prompt yas/x-prompt yas/ido-prompt yas/completing-prompt))
 (yas-global-mode 1)
 
@@ -174,10 +174,28 @@
 			 haml-mode-hook))
    (add-hook hook (lambda () (ruby-electric-mode t))))
 
+
+(defun inf-ruby-keys ()
+  "Set local key defs for inf-ruby in ruby-mode"
+  (define-key ruby-mode-map "\M-\C-x" 'ruby-send-definition)
+                                        ;  (define-key ruby-mode-map "\C-x\C-e" 'ruby-send-last-sexp)
+  (define-key ruby-mode-map "\C-c\C-b" 'ruby-send-block)
+  (define-key ruby-mode-map "\C-c\M-b" 'ruby-send-block-and-go)
+  (define-key ruby-mode-map "\C-c\C-x" 'ruby-send-definition)
+  (define-key ruby-mode-map "\C-c\M-x" 'ruby-send-definition-and-go)
+  (define-key ruby-mode-map "\C-c\C-r" 'ruby-send-region)
+  (define-key ruby-mode-map "\C-c\M-r" 'ruby-send-region-and-go)
+  (define-key ruby-mode-map "\C-c\C-z" 'switch-to-ruby)
+  (define-key ruby-mode-map "\C-c\C-l" 'ruby-load-file)
+  (define-key ruby-mode-map "\C-c\C-s" 'run-ruby)
+  )
+
+
+                                               
 (autoload 'run-ruby "inf-ruby"
       "Run an inferior Ruby process")
 (autoload 'inf-ruby-keys "inf-ruby"
-      "Set local key defs for inf-ruby in ruby-mode")
+       "Set local key defs for inf-ruby in ruby-mode")
 (add-hook 'ruby-mode-hook
           '(lambda ()
              (inf-ruby-setup-keybindings)
@@ -301,3 +319,83 @@
   (electric-pair-mode))
 
 ;;(electric-pair-mode +1)
+
+
+(defun electric-pair ()
+  "If at end of line, insert character pair without surrounding spaces.
+    Otherwise, just insert the typed character."
+  (interactive)
+  (if (eolp) (let (parens-require-spaces) (insert-pair)) (self-insert-command 1)))
+
+(add-hook 'html-mode-hook
+          (lambda ()
+            (define-key html-mode-map "\'" 'electric-pair)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;GTD
+;;2013-05-31
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; for agenda
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
+(setq org-agenda-files (list "~/.emacs.d/ding/GTD/gtd.org"
+                             "~/.emacs.d/ding/GTD/journal.org" ))
+(setq org-log-done t)
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/.emacs.d/ding/journal/gtd.org" "沙盒")
+         "* TODO %?\n %i\n %a")
+        ("j" "Journal" entry (file+datetree "~/.emacs.d/ding/journal/journal.org")
+         "*  %?\nEntered on %U\n %i\n %a")))
+
+(setq org-agenda-include-diary t)
+(setq org-agenda-ndays 1)
+
+;; used by org-clock-sum-today-by-tags
+(defun filter-by-tags ()
+  (let ((head-tags (org-get-tags-at)))
+    (member current-tag head-tags)))
+
+(defun org-clock-sum-today-by-tags (timerange &optional tstart tend noinsert)
+  (interactive "P")
+  (let* ((timerange-numeric-value (prefix-numeric-value timerange))
+         (files (org-add-archive-files (org-agenda-files)))
+         (include-tags '("娱乐" "计算机" "心学" "其它" "公务员"))
+         (tags-time-alist (mapcar (lambda (tag) `(,tag . 0)) include-tags))
+         (output-string "")
+         (tstart (or tstart
+                     (and timerange (equal timerange-numeric-value 4) (- (org-time-today) 86400))
+                     (and timerange (equal timerange-numeric-value 16) (org-read-date nil nil nil "Start Date/Time:"))
+                     (org-time-today)))
+         (tend (or tend
+                   (and timerange (equal timerange-numeric-value 16) (org-read-date nil nil nil "End Date/Time:"))
+                   (+ tstart 86400)))
+         h m file item prompt donesomething)
+    (while (setq file (pop files))
+      (setq org-agenda-buffer (if (file-exists-p file)
+                                  (org-get-agenda-file-buffer file)
+                                (error "No such file %s" file)))
+      (with-current-buffer org-agenda-buffer
+        (dolist (current-tag include-tags)
+          (org-clock-sum tstart tend 'filter-by-tags)
+          (setcdr (assoc current-tag tags-time-alist)
+                  (+ org-clock-file-total-minutes (cdr (assoc current-tag tags-time-alist)))))))
+    (while (setq item (pop tags-time-alist))
+      (unless (equal (cdr item) 0)
+        (setq donesomething t)
+        (setq h (/ (cdr item) 60)
+              m (- (cdr item) (* 60 h)))
+        (setq output-string (concat output-string (format "[-%s-] %.2d:%.2d\n" (car item) h m)))))
+    (unless donesomething
+      (setq output-string (concat output-string "[-Nothing-] Done nothing!!!\n")))
+    (unless noinsert
+      (insert output-string))
+    output-string))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages '((emacs-lisp . t)))
