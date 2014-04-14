@@ -73,17 +73,17 @@
 (setq auto-save-default nil)
 
   ;; default Latin font (e.g. Consolas)
-(when (eq system-type 'darwin)
+;;(when (eq system-type 'darwin)
 
   ;; default Latin font (e.g. Consolas)
-  (set-face-attribute 'default nil :family "Courier")
+  ;;(set-face-attribute 'default nil :family "Courier")
 
   ;; default font size (point * 10)
   ;;
   ;; WARNING!  Depending on the default font,
   ;; if the size is not supported very well, the frame will be clipped
   ;; so that the beginning of the buffer may not be visible correctly. 
-  (set-face-attribute 'default nil :height 165) 
+ ;; (set-face-attribute 'default nil :height 165) 
 
   ;; use specific font for Korean charset.
   ;; if you want to use different font size for specific charset,
@@ -98,7 +98,18 @@
 
   ;;(set-fontset-font t 'kana han symbol cjk-misc bopomofo (font-spec :name "HiraginoSansGB-W3" :size 14))	
   ;; you may want to add different for other charset in this way.
-  )
+;;) ;;;;
+;;
+
+;;
+;; Chinese support
+(require 'unicad)
+
+;; set Chinese font, or the when showing Italic Chinese characters, only rectangle block shown
+(set-fontset-font
+ (frame-parameter nil 'font)
+ 'han
+ (font-spec :family "Hiragino Sans GB" ))
 
 ;; (set-default-font
 ;;  "-apple-Hiragino_Sans_GB-medium-normal-normal-*-14-*-*-*-p-0-iso10646-1")
@@ -117,3 +128,5 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:family "DejaVu Sans" :foundry "unknown" :slant normal :weight normal :height 144 :width normal)))))
+
+(tool-bar-mode -1)
