@@ -111,6 +111,9 @@
  'han
  (font-spec :family "Hiragino Sans GB" ))
 
+(set-default-font "Source Code Pro-12")
+(set-fontset-font "fontset-default" 'gb18030' ("STHeiti" . "unicode-bmp"))
+
 ;; (set-default-font
 ;;  "-apple-Hiragino_Sans_GB-medium-normal-normal-*-14-*-*-*-p-0-iso10646-1")
 (custom-set-variables
