@@ -133,3 +133,7 @@
  '(default ((t (:family "DejaVu Sans" :foundry "unknown" :slant normal :weight normal :height 144 :width normal)))))
 
 (tool-bar-mode -1)
+;;(global-set-key (kbd "C-x f") 'find-file-in-repository)
+(require 'git-find-file)
+(global-set-key (kbd "C-x f") 'git-find-file)
+
