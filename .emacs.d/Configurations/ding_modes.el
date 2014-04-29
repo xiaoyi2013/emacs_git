@@ -162,7 +162,7 @@
 
 
 ; adding ruby electric
-(require 'ruby-electric)
+;;(require 'ruby-electric)
 ;; (setq open-paren-in-column-0-is-defun-start nil)
 (add-hook 'ruby-electric-mode-hook (lambda () (local-set-key "\r" 'newline-and-indent)))
 (add-hook 'ruby-mode-hook
